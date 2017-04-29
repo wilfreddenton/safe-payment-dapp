@@ -1,6 +1,11 @@
 <template>
-  <div id="app">
-    <router-view></router-view>
+  <div id="app" class="container">
+    <div class="page-header">
+      <router-link :to="{name: 'home'}"><h1>Safe Pay <small>make remote purchases securely with ether</small></h1></router-link>
+    </div>
+    <transition name="fade" mode="out-in">
+      <router-view></router-view>
+    </transition>
   </div>
 </template>
 
@@ -48,8 +53,23 @@ export default {
 </script>
 
 <style>
+a:hover, a:focus {
+  text-decoration: none;
+}
+
+a h1 {
+  color: rgb(51, 51, 51);
+}
+
 * {
   box-sizing: border-box;
+}
+
+.fade-enter-active, .fade-leave-active {
+  transition: opacity .2s
+}
+.fade-enter, .fade-leave-to /* .fade-leave-active in <2.1.8 */ {
+  opacity: 0
 }
 
 #app {

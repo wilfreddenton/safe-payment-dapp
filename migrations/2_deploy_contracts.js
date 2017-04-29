@@ -1,5 +1,5 @@
-var MetaCoin = artifacts.require("./MetaCoin.sol");
+var Sale = artifacts.require("./Sale.sol");
 
 module.exports = function(deployer) {
-  deployer.deploy(MetaCoin);
+  deployer.deploy(Sale);
 };

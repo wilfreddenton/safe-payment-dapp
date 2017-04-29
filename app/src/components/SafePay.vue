@@ -1,9 +1,5 @@
 <template>
-  <div class="safe-pay container">
-    <div class="page-header">
-      <h1>Safe Pay <small>make remote purchases securely with ether</small></h1>
-    </div>
-    <sale></sale>
+  <div class="safe-pay">
     <div class="row">
       <div class="col-sm-6">
         <div class="panel panel-default">
@@ -44,15 +40,11 @@
 </template>
 
 <script>
-import Sale from './Sale'
 import { mapGetters } from 'vuex'
 // import * as types from '../store/mutation-types'
 
 export default {
   name: 'safe-pay',
-  components: {
-    Sale
-  },
   computed: {
     ...mapGetters({
     })

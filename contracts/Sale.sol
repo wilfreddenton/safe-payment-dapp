@@ -35,7 +35,7 @@ contract Sale {
 
 	event Aborted(address indexed _sender, uint256 _time);
 	event Purchased(address indexed _sender, uint256 _time);
-	event Received(address indexed _sender, uint256 _time);
+	event Confirmed(address indexed _sender, uint256 _time);
 
 	/// Abort the purchase and reclaim the ether.
 	/// Can only be called by the seller before
@@ -65,12 +65,12 @@ contract Sale {
 
 	/// Confirm that you (the buyer) received the item.
 	/// This will release the locked ether.
-	function receive()
+	function confirm()
 		onlyBuyer
 		inState(State.Locked)
 	{
 		state = State.Inactive;
 		if (!buyer.send(value) || !seller.send(this.balance)) throw;
-		Received(msg.sender, now);
+		Confirmed(msg.sender, now);
 	}
 }
