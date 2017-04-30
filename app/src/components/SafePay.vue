@@ -40,6 +40,8 @@
 </template>
 
 <script>
+/* global web3:true */
+
 // import * as types from '../store/mutation-types'
 
 export default {
@@ -57,10 +59,10 @@ export default {
         return
       }
 
-      const price = parseFloat(this.price)
+      const price = new web3.BigNumber(this.price)
       if (confirm(`Are you sure you would like to create a sale for ${this.price} ETH?
 
-${price * 2} ETH will be transferred into the contract's account and held until the sale has been confirmed by the buyer at which point you will receive ${price * 3} ETH.`)) {
+${price.times(2)} ETH will be transferred into the contract's account and held until the sale has been confirmed by the buyer at which point you will receive ${price.times(3)} ETH.`)) {
         this.$store.dispatch('createSale', { price, router: this.$router })
       }
     },

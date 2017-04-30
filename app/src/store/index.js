@@ -35,6 +35,7 @@ const mutations = {
   [types.ROUTE_CHANGED] (state, { to, from }) {
     if (to.name === 'sale' && (from.name !== 'sale' || from.params.address !== to.params.address)) {
       state.sale.address = to.params.address
+      state.sale.events = []
     }
   },
   [types.UPDATE_ACCOUNT] (state, account) {

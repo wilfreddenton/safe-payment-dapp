@@ -33,9 +33,9 @@ contract Sale {
 		_;
 	}
 
-	event Aborted(address indexed _sale, address indexed _sender, uint256 _time);
-	event Purchased(address indexed _sale, address _buyer, uint256 _time);
-	event Confirmed(address indexed _sale, address indexed _sender, uint256 _time);
+	event Aborted(address indexed _sale, uint256 _time);
+	event Purchased(address indexed _sale, uint256 _time);
+	event Confirmed(address indexed _sale, uint256 _time);
 
 	/// Abort the purchase and reclaim the ether.
 	/// Can only be called by the seller before
@@ -46,7 +46,7 @@ contract Sale {
 	{
 		state = State.Locked;
 		if (!seller.send(this.balance)) throw;
-		Aborted(address(this), msg.sender, now);
+		Aborted(address(this), now);
 	}
 
 	/// Confirm the purchase as buyer.
@@ -60,7 +60,7 @@ contract Sale {
 	{
 		buyer = msg.sender;
 		state = State.Locked;
-		Purchased(address(this), msg.sender, now);
+		Purchased(address(this), now);
 	}
 
 	/// Confirm that you (the buyer) received the item.
@@ -71,6 +71,6 @@ contract Sale {
 	{
 		state = State.Inactive;
 		if (!buyer.send(value) || !seller.send(this.balance)) throw;
-		Confirmed(address(this), msg.sender, now);
+		Confirmed(address(this), now);
 	}
 }

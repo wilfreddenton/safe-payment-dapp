@@ -19,8 +19,8 @@
               <tr>
                 <td>{{ address }}</td>
                 <td>{{ status }}</td>
-                <td>{{ value }}</td>
-                <td>{{ balance }}</td>
+                <td>{{ value.toString() }}</td>
+                <td>{{ balance.toString() }}</td>
               </tr>
             </tbody>
           </table>
@@ -101,21 +101,35 @@ export default {
     },
     abortHandler (e) {
       if (this.isDisabled(e.target)) return
-      this.$store.dispatch('abort')
+
+      if (confirm(`Are you sure you want to abort the sale?
+
+If you choose to abort, ${this.value.times(2)} ETH will be returned to your account.`)) {
+        this.$store.dispatch('abort')
+      }
     },
     purchaseHandler (e) {
       if (this.isDisabled(e.target)) return
+
+      if (confirm(`Are you sure you want to make the purchase?
+
+If you choose to make the purchase, ${this.value.times(2)} ETH will be transferred from your account into the contract's account. Upon confirming that you have received the item you purchased, ${this.value} ETH will be transferred back into your account.`)) {
+        this.$store.dispatch('purchase')
+      }
     },
     confirmHandler (e) {
       if (this.isDisabled(e.target)) return
+
+      if (confirm(`Are you sure you want to confirm the sale?
+
+By confirming, you inform the contract that you have received the item purchased from the seller. ${this.value.times(3)} ETH will be transferred to the seller's account and ${this.value} ETH will be transferred to yours.`)) {
+        this.$store.dispatch('confirm')
+      }
     }
   },
   watch: {
     address () {
       this.$store.dispatch('getSaleInfo')
-    },
-    seller () {
-      this.$store.dispatch('listen')
     }
   },
   mounted () {

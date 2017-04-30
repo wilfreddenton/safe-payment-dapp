@@ -16,7 +16,7 @@ const state = {
   buyer: '',
   seller: '',
   status: '',
-  value: '',
+  value: new web3.BigNumber(0),
   balance: '',
   events: []
 }
@@ -34,7 +34,7 @@ const getters = {
 const actions = {
   createSale ({ commit, state }, { price, router }) {
     commit(types.UPDATE_LOADING, true)
-    const value = web3.toWei(price * 2, 'ether')
+    const value = web3.toWei(price.times(2), 'ether')
     Sale.new({ from: state.account, value: value }).then((instance) => {
       commit(types.UPDATE_LOADING, false)
       router.push({ name: 'sale', params: { address: instance.address } })
@@ -64,6 +64,7 @@ const actions = {
         commit(types.UPDATE_SELLER, values[3])
         commit(types.UPDATE_BALANCE, toEth(values[4]))
         commit(types.UPDATE_LOADING, false)
+        dispatch('listen')
       }).catch((err) => {
         alert(err)
         commit(types.UPDATE_LOADING, false)
@@ -84,11 +85,9 @@ const actions = {
         commit(types.NEW_EVENT, { name: event, time: toDate(args._time) })
       }
 
-      sale.Aborted({ _sale: state.address, _sender: state.seller }, range, watcher)
-
+      sale.Aborted({ _sale: state.address }, range, watcher)
       sale.Purchased({ _sale: state.address }, range, watcher)
-
-      sale.Confirmed({ _sale: state.address, _sender: state.buyer }, range, watcher)
+      sale.Confirmed({ _sale: state.address }, range, watcher)
     })
   },
   abort ({ commit, dispatch, state }) {
@@ -101,13 +100,33 @@ const actions = {
       alert(err)
       commit(types.UPDATE_LOADING, false)
     })
+  },
+  purchase ({ commit, dispatch, state }) {
+    commit(types.UPDATE_LOADING, true)
+    Sale.at(state.address).then((instance) => {
+      const value = web3.toWei(state.value.times(2), 'ether')
+      return instance.purchase({ from: state.account, value: value })
+    }).then(() => {
+      dispatch('getSaleInfo')
+    }).catch((err) => {
+      alert(err)
+      commit(types.UPDATE_LOADING, false)
+    })
+  },
+  confirm ({ commit, dispatch, state }) {
+    commit(types.UPDATE_LOADING, true)
+    Sale.at(state.address).then((instance) => {
+      return instance.confirm({ from: state.account })
+    }).then(() => {
+      dispatch('getSaleInfo')
+    }).catch((err) => {
+      alert(err)
+      commit(types.UPDATE_LOADING, false)
+    })
   }
 }
 
 const mutations = {
-  [types.SET_ADDRESS] (state, address) {
-    state.address = address
-  },
   [types.UPDATE_BALANCE] (state, balance) {
     state.balance = balance
   },
@@ -124,7 +143,7 @@ const mutations = {
     state.seller = seller
   },
   [types.NEW_EVENT] (state, event) {
-    state.events = state.events.concat([event]).sort((a, b) => a.getTime() - b.getTime())
+    state.events = state.events.concat([event]).sort((a, b) => a.time.getTime() - b.time.getTime())
   }
 }
 

@@ -14,7 +14,7 @@ export function getBalance (address) {
 }
 
 export function toEth (bigNumWei) {
-  return web3.fromWei(bigNumWei).toString()
+  return web3.fromWei(bigNumWei)
 }
 
 export function isZero (address) {
