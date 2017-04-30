@@ -44,9 +44,9 @@ contract Sale {
 		onlySeller
 		inState(State.Created)
 	{
+		Aborted(address(this), now);
 		state = State.Locked;
 		if (!seller.send(this.balance)) throw;
-		Aborted(address(this), now);
 	}
 
 	/// Confirm the purchase as buyer.
@@ -58,9 +58,9 @@ contract Sale {
 		require(msg.value == 2 * value)
 		payable
 	{
+		Purchased(address(this), now);
 		buyer = msg.sender;
 		state = State.Locked;
-		Purchased(address(this), now);
 	}
 
 	/// Confirm that you (the buyer) received the item.
@@ -69,8 +69,8 @@ contract Sale {
 		onlyBuyer
 		inState(State.Locked)
 	{
+		Confirmed(address(this), now);
 		state = State.Inactive;
 		if (!buyer.send(value) || !seller.send(this.balance)) throw;
-		Confirmed(address(this), now);
 	}
 }

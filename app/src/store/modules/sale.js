@@ -2,7 +2,7 @@
 
 import { Sale } from '../../contracts'
 import * as types from '../mutation-types'
-import { getBalance, toEth, toDate } from '../../utils'
+import { getBalance, toEth } from '../../utils'
 
 const statusEnum = {
   0: 'Created',
@@ -35,12 +35,11 @@ const actions = {
   createSale ({ commit, state }, { price, router }) {
     commit(types.UPDATE_LOADING, true)
     const value = web3.toWei(price.times(2), 'ether')
-    Sale.new({ from: state.account, value: value }).then((instance) => {
-      commit(types.UPDATE_LOADING, false)
+    Sale.new({ from: state.account, value: value, gas: 4000000 }).then((instance) => {
+      // don't need to set loading to false here because it will happen in getSaleInfo
       router.push({ name: 'sale', params: { address: instance.address } })
     }).catch((err) => {
       alert(err)
-      router.push({ name: 'home' })
       commit(types.UPDATE_LOADING, false)
     })
   },
@@ -64,38 +63,16 @@ const actions = {
         commit(types.UPDATE_SELLER, values[3])
         commit(types.UPDATE_BALANCE, toEth(values[4]))
         commit(types.UPDATE_LOADING, false)
-        dispatch('listen')
       }).catch((err) => {
         alert(err)
         commit(types.UPDATE_LOADING, false)
       })
     })
   },
-  listen ({ commit, state }) {
-    Sale.at(state.address).then((instance) => {
-      let sale = instance
-      const range = {fromBlock: 0, toBlock: 'latest'}
-
-      const watcher = (err, { event, args }) => {
-        if (err) {
-          console.error(err)
-          return
-        }
-
-        commit(types.NEW_EVENT, { name: event, time: toDate(args._time) })
-      }
-
-      sale.Aborted({ _sale: state.address }, range, watcher)
-      sale.Purchased({ _sale: state.address }, range, watcher)
-      sale.Confirmed({ _sale: state.address }, range, watcher)
-    })
-  },
   abort ({ commit, dispatch, state }) {
     commit(types.UPDATE_LOADING, true)
     Sale.at(state.address).then((instance) => {
       return instance.abort({ from: state.account })
-    }).then(() => {
-      dispatch('getSaleInfo')
     }).catch((err) => {
       alert(err)
       commit(types.UPDATE_LOADING, false)
@@ -106,8 +83,6 @@ const actions = {
     Sale.at(state.address).then((instance) => {
       const value = web3.toWei(state.value.times(2), 'ether')
       return instance.purchase({ from: state.account, value: value })
-    }).then(() => {
-      dispatch('getSaleInfo')
     }).catch((err) => {
       alert(err)
       commit(types.UPDATE_LOADING, false)
@@ -117,8 +92,6 @@ const actions = {
     commit(types.UPDATE_LOADING, true)
     Sale.at(state.address).then((instance) => {
       return instance.confirm({ from: state.account })
-    }).then(() => {
-      dispatch('getSaleInfo')
     }).catch((err) => {
       alert(err)
       commit(types.UPDATE_LOADING, false)

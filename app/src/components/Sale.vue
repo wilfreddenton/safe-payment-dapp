@@ -76,10 +76,17 @@
 
 <script>
 import { mapGetters } from 'vuex'
-import { isZero } from '../utils'
+import { Sale } from '../contracts'
+import { isZero, toDate } from '../utils'
+import * as types from '../store/mutation-types'
 
 export default {
   name: 'sale',
+  data () {
+    return {
+      watchers: []
+    }
+  },
   computed: {
     ...mapGetters({
       account: 'account',
@@ -125,15 +132,69 @@ If you choose to make the purchase, ${this.value.times(2)} ETH will be transferr
 By confirming, you inform the contract that you have received the item purchased from the seller. ${this.value.times(3)} ETH will be transferred to the seller's account and ${this.value} ETH will be transferred to yours.`)) {
         this.$store.dispatch('confirm')
       }
+    },
+    hydrate () {
+      this.$store.dispatch('getSaleInfo')
+      this.listen()
+    },
+    listen () {
+      Sale.at(this.address).then((instance) => {
+        let sale = instance
+        const range = {fromBlock: 0, toBlock: 'latest'}
+
+        const getter = (err, logs) => {
+          logs.forEach(({ event, args }) => {
+            if (err) {
+              console.error(err)
+              return
+            }
+
+            this.$store.commit(types.NEW_EVENT, { name: event, time: toDate(args._time) })
+          })
+        }
+
+        const watcher = (err, { event, args }) => {
+          if (err) {
+            console.error(err)
+            return
+          }
+
+          this.$store.commit(types.NEW_EVENT, { name: event, time: toDate(args._time) })
+          this.$store.dispatch('getSaleInfo')
+        }
+
+        // getters
+        sale.Aborted({ _sale: this.address }, range).get(getter)
+
+        sale.Purchased({ _sale: this.address }, range).get(getter)
+
+        sale.Confirmed({ _sale: this.address }, range).get(getter)
+
+        // watchers
+        const abortedEvent = sale.Aborted({ _sale: this.address })
+        abortedEvent.watch(watcher)
+
+        const purchasedEvent = sale.Purchased({ _sale: this.address })
+        purchasedEvent.watch(watcher)
+
+        const confirmedEvent = sale.Confirmed({ _sale: this.address })
+        confirmedEvent.watch(watcher)
+
+        this.watchers.forEach((event) => { event.stopWatching() })
+        this.watchers = [abortedEvent, purchasedEvent, confirmedEvent]
+      })
     }
   },
   watch: {
     address () {
-      this.$store.dispatch('getSaleInfo')
+      this.hydrate()
     }
   },
   mounted () {
-    this.$store.dispatch('getSaleInfo')
+    this.hydrate()
+  },
+  beforeDestroy () {
+    this.watchers.forEach((event) => { event.stopWatching() })
   }
 }
 </script>
