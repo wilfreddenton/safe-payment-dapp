@@ -15,12 +15,12 @@
                 <th>Balance (ETH)</th>
               </tr>
             </thead>
-            <tbody id="candidate-rows">
+            <tbody id="info-rows">
               <tr>
-                <td>0xfcb08f41e92dab55fb5b52cb4ddb62bcc7c14270</td>
-                <td>Active</td>
-                <td>100</td>
-                <td>0</td>
+                <td>{{ address }}</td>
+                <td>{{ status }}</td>
+                <td>{{ value }}</td>
+                <td>{{ balance }}</td>
               </tr>
             </tbody>
           </table>
@@ -33,25 +33,17 @@
           <div class="panel-heading">
             <div class="panel-title">Event Log</div>
           </div>
-          <table class="table">
+          <table class="table table-bordered table-striped">
             <thead>
               <tr>
                 <th>Type</th>
                 <th>Time</th>
               </tr>
             </thead>
-            <tbody id="candidate-rows">
-              <tr>
-                <td>Created</td>
-                <td>somedate</td>
-              </tr>
-              <tr>
-                <td>Purchased</td>
-                <td>asdfasdf</td>
-              </tr>
-              <tr>
-                <td>Confirmed</td>
-                <td>adfasdf</td>
+            <tbody id="event-rows">
+              <tr v-for="event in events">
+                <td>{{ event.name }}</td>
+                <td>{{ event.time.toString() }}</td>
               </tr>
             </tbody>
           </table>
@@ -63,9 +55,18 @@
             <div class="panel-title">Actions</div>
           </div>
           <div class="list-group">
-            <a href="#" class="list-group-item list-group-item-danger">Abort</a>
-            <a href="#" class="list-group-item list-group-item-warning">Purchase</a>
-            <a href="#" class="list-group-item list-group-item-success">Confirm</a>
+            <div @click="abortHandler" class="action list-group-item list-group-item-danger"
+              :class="{disabled: account !== seller || status !== 'Created'}">
+              Abort
+            </div>
+            <div @click="purchaseHandler" class="action list-group-item list-group-item-warning"
+              :class="{disabled: account === seller || status !== 'Created'}">
+              Purchase
+            </div>
+            <div @click="confirmHandler" class="action list-group-item list-group-item-success"
+              :class="{disabled: !allowConfirmation() || status !== 'Locked'}">
+              Confirm
+            </div>
           </div>
         </div>
       </div>
@@ -74,10 +75,57 @@
 </template>
 
 <script>
+import { mapGetters } from 'vuex'
+import { isZero } from '../utils'
+
 export default {
-  name: 'sale'
+  name: 'sale',
+  computed: {
+    ...mapGetters({
+      account: 'account',
+      address: 'address',
+      balance: 'balance',
+      value: 'value',
+      status: 'status',
+      buyer: 'buyer',
+      seller: 'seller',
+      events: 'events'
+    })
+  },
+  methods: {
+    allowConfirmation () {
+      return !isZero(this.buyer) && this.buyer === this.account
+    },
+    isDisabled (ele) {
+      return ele.classList.contains('disabled')
+    },
+    abortHandler (e) {
+      if (this.isDisabled(e.target)) return
+      this.$store.dispatch('abort')
+    },
+    purchaseHandler (e) {
+      if (this.isDisabled(e.target)) return
+    },
+    confirmHandler (e) {
+      if (this.isDisabled(e.target)) return
+    }
+  },
+  watch: {
+    address () {
+      this.$store.dispatch('getSaleInfo')
+    },
+    seller () {
+      this.$store.dispatch('listen')
+    }
+  },
+  mounted () {
+    this.$store.dispatch('getSaleInfo')
+  }
 }
 </script>
 
 <style scoped>
+.action {
+  cursor: pointer;
+}
 </style>

@@ -8,10 +8,10 @@
           </div>
           <div class="panel-body">
             <div id="msg"></div>
-            <form id="vote">
+            <form id="create" @submit.prevent="createHandler">
               <div class="form-group">
                 <label for="price">Price (ETH)</label>
-                <input type="number" id="price" class="form-control" placeholder="10"/>
+                <input type="number" step="any" id="price" class="form-control" placeholder="10" v-model="price"/>
               </div>
               <button type="submit" class="btn btn-success">Create</button>
             </form>
@@ -25,10 +25,10 @@
           </div>
           <div class="panel-body">
             <div id="msg"></div>
-            <form id="vote">
+            <form id="lookup" @submit.prevent="lookupHandler">
               <div class="form-group">
                 <label for="address">Address</label>
-                <input type="number" id="address" class="form-control" placeholder="0xfcb08f41e92dab55fb5b52cb4ddb62bcc7c14271"/>
+                <input type="text" id="address" class="form-control" placeholder="0xfcb08f41e92dab55fb5b52cb4ddb62bcc7c14271" v-model="address"/>
               </div>
               <button type="submit" class="btn btn-info">Lookup</button>
             </form>
@@ -40,16 +40,38 @@
 </template>
 
 <script>
-import { mapGetters } from 'vuex'
 // import * as types from '../store/mutation-types'
 
 export default {
   name: 'safe-pay',
-  computed: {
-    ...mapGetters({
-    })
+  data () {
+    return {
+      price: '',
+      address: ''
+    }
   },
   methods: {
+    createHandler () {
+      if (this.price === '' || isNaN(this.price) || parseFloat(this.price) === 0) {
+        alert('invalid price: ' + this.price)
+        return
+      }
+
+      const price = parseFloat(this.price)
+      if (confirm(`Are you sure you would like to create a sale for ${this.price} ETH?
+
+${price * 2} ETH will be transferred into the contract's account and held until the sale has been confirmed by the buyer at which point you will receive ${price * 3} ETH.`)) {
+        this.$store.dispatch('createSale', { price, router: this.$router })
+      }
+    },
+    lookupHandler () {
+      if (this.address === '') {
+        alert('invalid address: ' + this.address)
+        return
+      }
+
+      this.$router.push({ name: 'sale', params: { address: this.address } })
+    }
   }
 }
 </script>

@@ -1,10 +1,19 @@
 <template>
-  <div id="app" class="container">
-    <div class="page-header">
-      <router-link :to="{name: 'home'}"><h1>Safe Pay <small>make remote purchases securely with ether</small></h1></router-link>
+  <div id="app">
+    <div class="container" :class="{loading: loading}">
+      <div class="page-header">
+        <router-link :to="{name: 'home'}"><h1>Safe Pay <small>make remote purchases securely with ether</small></h1></router-link>
+      </div>
+      <transition name="fade" mode="out-in">
+        <router-view></router-view>
+      </transition>
     </div>
-    <transition name="fade" mode="out-in">
-      <router-view></router-view>
+    <transition name="fade">
+      <div id="loading" v-if="loading">
+        <div class="progress">
+          <div class="progress-bar progress-bar-striped active" role="progressbar" aria-valuenow="45" aria-valuemin="0" aria-valuemax="100" style="width: 100%"></div>
+        </div>
+      </div>
     </transition>
   </div>
 </template>
@@ -24,7 +33,8 @@ export default {
   },
   computed: {
     ...mapGetters({
-      account: 'account'
+      account: 'account',
+      loading: 'loading'
     })
   },
   mounted () {
@@ -38,11 +48,11 @@ export default {
     window.web3 = new Web3(web3.currentProvider)
 
     // keep account updated if user decides to switch
-    this.$store.dispatch('setAccount', web3.eth.accounts[0])
+    this.$store.dispatch('setAccount', { account: web3.eth.accounts[0], router: this.$router })
     this.accountInterval = setInterval(() => {
       const account = web3.eth.accounts[0]
       if (account !== this.account) {
-        this.$store.dispatch('updateAccount', account)
+        this.$store.dispatch('updateAccount', { account, router: this.$router })
       }
     }, 100)
   },
@@ -52,7 +62,7 @@ export default {
 }
 </script>
 
-<style>
+<style lang="scss">
 a:hover, a:focus {
   text-decoration: none;
 }
@@ -73,5 +83,28 @@ a h1 {
 }
 
 #app {
+  > .container {
+    transition: filter 200ms;
+    &.loading {
+      filter: blur(5px);
+    }
+  }
+
+  #loading {
+    width: 100vw;
+    height: 100vh;
+    top: 0px;
+    left: 0px;
+    background-color: transparent;
+    position: absolute;
+    padding: 1em;
+
+    .progress {
+      position: relative;
+      max-width: 500px;
+      margin: -10px auto 0 auto;
+      top: 50%;
+    }
+  }
 }
 </style>
