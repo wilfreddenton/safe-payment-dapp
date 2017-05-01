@@ -94,7 +94,7 @@ a h1 {
   > .container {
     transition: filter 200ms;
     &.loading {
-      filter: blur(5px);
+      filter: blur(5px) grayscale(100%);
     }
   }
 
