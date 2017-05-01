@@ -10,8 +10,15 @@
     </div>
     <transition name="fade">
       <div id="loading" v-if="loading">
-        <div class="progress">
-          <div class="progress-bar progress-bar-striped active" role="progressbar" aria-valuenow="45" aria-valuemin="0" aria-valuemax="100" style="width: 100%"></div>
+        <div class="panel panel-default">
+          <div class="panel-heading">
+            <div class="panel-title">Transaction processing...</div>
+          </div>
+          <div class="panel-body">
+            <div class="progress">
+              <div class="progress-bar progress-bar-striped active" role="progressbar" aria-valuenow="45" aria-valuemin="0" aria-valuemax="100" style="width: 100%"></div>
+            </div>
+          </div>
         </div>
       </div>
     </transition>
@@ -99,11 +106,15 @@ a h1 {
     position: absolute;
     padding: 1em;
 
-    .progress {
+    .panel {
       position: relative;
-      max-width: 500px;
-      margin: -10px auto 0 auto;
       top: 50%;
+      margin: -47px auto 0 auto;
+      max-width: 500px;
+
+      .progress {
+        margin-bottom: 0;
+      }
     }
   }
 }

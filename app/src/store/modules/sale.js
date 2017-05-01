@@ -35,7 +35,7 @@ const actions = {
   createSale ({ commit, state }, { price, router }) {
     commit(types.UPDATE_LOADING, true)
     const value = web3.toWei(price.times(2), 'ether')
-    Sale.new({ from: state.account, value: value, gas: 4000000 }).then((instance) => {
+    Sale.new({ from: state.account, value: value }).then((instance) => {
       // don't need to set loading to false here because it will happen in getSaleInfo
       router.push({ name: 'sale', params: { address: instance.address } })
     }).catch((err) => {

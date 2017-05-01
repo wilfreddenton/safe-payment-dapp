@@ -170,18 +170,28 @@ By confirming, you inform the contract that you have received the item purchased
 
         sale.Confirmed({ _sale: this.address }, range).get(getter)
 
+        const watchers = []
         // watchers
-        const abortedEvent = sale.Aborted({ _sale: this.address })
-        abortedEvent.watch(watcher)
+        if (status === 'Created') {
+          const abortedEvent = sale.Aborted({ _sale: this.address })
+          abortedEvent.watch(watcher)
+          watchers.push(abortedEvent)
+        }
 
-        const purchasedEvent = sale.Purchased({ _sale: this.address })
-        purchasedEvent.watch(watcher)
+        if (status === 'Created') {
+          const purchasedEvent = sale.Purchased({ _sale: this.address })
+          purchasedEvent.watch(watcher)
+          watchers.push(purchasedEvent)
+        }
 
-        const confirmedEvent = sale.Confirmed({ _sale: this.address })
-        confirmedEvent.watch(watcher)
+        if (status === 'Locked') {
+          const confirmedEvent = sale.Confirmed({ _sale: this.address })
+          confirmedEvent.watch(watcher)
+          watchers.push(confirmedEvent)
+        }
 
         this.watchers.forEach((event) => { event.stopWatching() })
-        this.watchers = [abortedEvent, purchasedEvent, confirmedEvent]
+        this.watchers = watchers
       })
     }
   },
