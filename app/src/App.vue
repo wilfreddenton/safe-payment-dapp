@@ -12,7 +12,7 @@
       <div id="loading" v-if="loading">
         <div class="panel panel-default">
           <div class="panel-heading">
-            <div class="panel-title">Transaction processing...</div>
+            <div class="panel-title">{{ loadingText }}</div>
           </div>
           <div class="panel-body">
             <div class="progress">
@@ -41,7 +41,8 @@ export default {
   computed: {
     ...mapGetters({
       account: 'account',
-      loading: 'loading'
+      loading: 'loading',
+      loadingText: 'loadingText'
     })
   },
   mounted () {

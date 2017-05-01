@@ -10,12 +10,16 @@ const debug = process.env.NODE_ENV !== 'production'
 
 const rootState = {
   account: '',
-  loading: false
+  loading: false,
+  loadingText: '',
+  error: ''
 }
 
 const getters = {
   account: state => state.account,
-  loading: state => state.loading
+  loading: state => state.loading,
+  loadingText: state => state.loadingText,
+  error: state => state.error
 }
 
 const actions = {
@@ -44,6 +48,12 @@ const mutations = {
   },
   [types.UPDATE_LOADING] (state, loading) {
     state.loading = loading
+  },
+  [types.UPDATE_LOADING_TEXT] (state, loadingText) {
+    state.loadingText = loadingText
+  },
+  [types.UPDATE_ERROR] (state, error) {
+    state.error = error
   }
 }
 

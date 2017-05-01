@@ -2,7 +2,7 @@
   <div class="sale">
     <div class="row">
       <div class="col-sm-12">
-        <div class="panel panel-default table-responsive">
+        <div class="panel panel-primary table-responsive">
           <div class="panel-heading">
             <div class="panel-title">Sale</div>
           </div>
@@ -134,7 +134,7 @@ By confirming, you inform the contract that you have received the item purchased
       }
     },
     hydrate () {
-      this.$store.dispatch('getSaleInfo')
+      this.$store.dispatch('getSaleInfo', this.$router)
       this.listen()
     },
     listen () {
@@ -160,7 +160,7 @@ By confirming, you inform the contract that you have received the item purchased
           }
 
           this.$store.commit(types.NEW_EVENT, { name: event, time: toDate(args._time) })
-          this.$store.dispatch('getSaleInfo')
+          this.$store.dispatch('getSaleInfo', this.$router)
         }
 
         // getters

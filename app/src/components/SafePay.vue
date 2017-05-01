@@ -2,7 +2,7 @@
   <div class="safe-pay">
     <div class="row">
       <div class="col-sm-6">
-        <div class="panel panel-default">
+        <div class="panel panel-success">
           <div class="panel-heading">
             <div class="panel-title">Create Sale</div>
           </div>
@@ -19,7 +19,7 @@
         </div>
       </div>
       <div class="col-sm-6">
-        <div class="panel panel-default">
+        <div class="panel panel-info">
           <div class="panel-heading">
             <div class="panel-title">Lookup Sale</div>
           </div>

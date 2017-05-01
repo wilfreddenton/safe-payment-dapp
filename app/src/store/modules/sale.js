@@ -34,6 +34,7 @@ const getters = {
 const actions = {
   createSale ({ commit, state }, { price, router }) {
     commit(types.UPDATE_LOADING, true)
+    commit(types.UPDATE_LOADING_TEXT, 'Creating new sale contract...')
     const value = web3.toWei(price.times(2), 'ether')
     Sale.new({ from: state.account, value: value }).then((instance) => {
       // don't need to set loading to false here because it will happen in getSaleInfo
@@ -43,34 +44,43 @@ const actions = {
       commit(types.UPDATE_LOADING, false)
     })
   },
-  getSaleInfo ({ commit, dispatch, state }) {
+  getSaleInfo ({ commit, dispatch, state }, router) {
     commit(types.UPDATE_LOADING, true)
-    Sale.at(state.address).then((instance) => {
-      let sale = instance
-      const from = { from: state.account }
-      const promises = [
-        sale.value.call(from),
-        sale.state.call(from),
-        sale.buyer.call(from),
-        sale.seller.call(from),
-        getBalance(state.address)
-      ]
+    commit(types.UPDATE_LOADING_TEXT, 'Retrieving sale info...')
+    try {
+      Sale.at(state.address).then((instance) => {
+        let sale = instance
+        const from = { from: state.account }
+        const promises = [
+          sale.value.call(from),
+          sale.state.call(from),
+          sale.buyer.call(from),
+          sale.seller.call(from),
+          getBalance(state.address)
+        ]
 
-      Promise.all(promises).then((values) => {
-        commit(types.UPDATE_VALUE, toEth(values[0]))
-        commit(types.UPDATE_STATUS, statusEnum[values[1].toString()])
-        commit(types.UPDATE_BUYER, values[2])
-        commit(types.UPDATE_SELLER, values[3])
-        commit(types.UPDATE_BALANCE, toEth(values[4]))
-        commit(types.UPDATE_LOADING, false)
-      }).catch((err) => {
-        alert(err)
-        commit(types.UPDATE_LOADING, false)
+        Promise.all(promises).then((values) => {
+          commit(types.UPDATE_VALUE, toEth(values[0]))
+          commit(types.UPDATE_STATUS, statusEnum[values[1].toString()])
+          commit(types.UPDATE_BUYER, values[2])
+          commit(types.UPDATE_SELLER, values[3])
+          commit(types.UPDATE_BALANCE, toEth(values[4]))
+          commit(types.UPDATE_LOADING, false)
+        }).catch((err) => {
+          alert(err)
+          commit(types.UPDATE_LOADING, false)
+        })
       })
-    })
+    } catch (err) {
+      console.error(err)
+      commit(types.UPDATE_LOADING, false)
+      commit(types.UPDATE_ERROR, err.toString())
+      router.push({ name: 'error' })
+    }
   },
   abort ({ commit, dispatch, state }) {
     commit(types.UPDATE_LOADING, true)
+    commit(types.UPDATE_LOADING_TEXT, 'Aborting sale...')
     Sale.at(state.address).then((instance) => {
       return instance.abort({ from: state.account })
     }).catch((err) => {
@@ -80,6 +90,7 @@ const actions = {
   },
   purchase ({ commit, dispatch, state }) {
     commit(types.UPDATE_LOADING, true)
+    commit(types.UPDATE_LOADING_TEXT, 'Purchasing...')
     Sale.at(state.address).then((instance) => {
       const value = web3.toWei(state.value.times(2), 'ether')
       return instance.purchase({ from: state.account, value: value })
@@ -90,6 +101,7 @@ const actions = {
   },
   confirm ({ commit, dispatch, state }) {
     commit(types.UPDATE_LOADING, true)
+    commit(types.UPDATE_LOADING_TEXT, 'Confirming sale...')
     Sale.at(state.address).then((instance) => {
       return instance.confirm({ from: state.account })
     }).catch((err) => {
